@@ -1,0 +1,37 @@
+{
+  "appId": "com.dentalsignal.app",
+  "appName": "Dental Signal",
+  "webDir": "www",
+  "server": {
+    "allowNavigation": [
+      "*.firebaseapp.com",
+      "*.googleapis.com",
+      "api.stripe.com",
+      "*.stripe.com",
+      "*.gstatic.com",
+      "buy.stripe.com",
+      "billing.stripe.com"
+    ]
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0d1520",
+    "scrollEnabled": false,
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    },
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#0d1520",
+      "showSpinner": false,
+      "launchFadeOutDuration": 500
+    },
+    "StatusBar": {
+      "style": "Dark",
+      "backgroundColor": "#0f1a26"
+    }
+  }
+}
