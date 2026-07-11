@@ -8,9 +8,9 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.dentalsignal.app
-        certificate: dental_signal_distribution
-        provisioning_profile: PingTone
       node: 18.17.0
+      groups:
+        - ios-signing
       vars:
         XCODE_WORKSPACE: ios/App/App.xcworkspace
         XCODE_SCHEME: App
