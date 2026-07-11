@@ -38,11 +38,11 @@ workflows:
             -scheme "$XCODE_SCHEME" \
             -configuration Release \
             -archivePath build/App.xcarchive \
+            -destination "generic/platform=iOS" \
             archive \
-            CODE_SIGN_STYLE=Manual \
-            PROVISIONING_PROFILE_SPECIFIER="PingTone" \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
-            DEVELOPMENT_TEAM="4P5W97X6P8"
+            DEVELOPMENT_TEAM="4P5W97X6P8" \
+            CODE_SIGN_STYLE="Automatic" \
+            CODE_SIGN_IDENTITY="iPhone Distribution"
           xcodebuild \
             -exportArchive \
             -archivePath build/App.xcarchive \
