@@ -6,6 +6,13 @@
   <string>app-store</string>
   <key>teamID</key>
   <string>4P5W97X6P8</string>
+  <key>signingStyle</key>
+  <string>manual</string>
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>com.dentalsignal.app</key>
+    <string>PingTone</string>
+  </dict>
   <key>uploadBitcode</key>
   <false/>
   <key>uploadSymbols</key>

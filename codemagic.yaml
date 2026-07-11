@@ -36,7 +36,9 @@ workflows:
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME" \
-            --export-options-plist export_options.plist
+            --export-options-plist export_options.plist \
+            --code-signing-identity "iPhone Distribution" \
+            --provisioning-profile-specifier "PingTone"
 
     artifacts:
       - build/ios/ipa/*.ipa
