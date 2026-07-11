@@ -22,6 +22,9 @@ workflows:
       - name: Install Capacitor CLI
         script: npm install -g @capacitor/cli
 
+      - name: Add iOS platform
+        script: npx cap add ios
+
       - name: Sync Capacitor iOS
         script: npx cap sync ios
 
