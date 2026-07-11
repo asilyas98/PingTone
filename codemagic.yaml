@@ -43,7 +43,16 @@ workflows:
 
       - name: Publish to TestFlight
         script: |
-          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/asc_key.p8
+          python3 -c "
+          import os
+          key = os.environ['APP_STORE_CONNECT_PRIVATE_KEY']
+          key = key.replace('\\\\n', '\\n')
+          with open('/tmp/asc_key.p8', 'w') as f:
+              f.write(key)
+              if not key.endswith('\\n'):
+                  f.write('\\n')
+          "
+          cat /tmp/asc_key.p8
           app-store-connect publish \
             --path build/ios/ipa/*.ipa \
             --key-id "$APP_STORE_CONNECT_KEY_IDENTIFIER" \
