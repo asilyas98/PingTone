@@ -159,6 +159,25 @@ body{background:#1a2535;font-family:-apple-system,Arial,sans-serif;min-height:10
 .ppbtn{-webkit-flex:1;flex:1;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:bold;cursor:pointer;outline:none;}
 .ppbtn.yes{background:#1565a0;color:#fff;}
 .ppbtn.no{background:#253344;color:#7a9ab5;}
+/* ── PROFILE PHOTOS ── */
+.pavatar{width:36px;height:36px;border-radius:50%;object-fit:cover;cursor:pointer;border:2px solid #3a6080;flex-shrink:0;background:#1a2535;}
+.pavatar-wrap{width:36px;height:36px;border-radius:50%;background:#1e3040;border:2px solid #3a5068;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:16px;color:#4a7090;}
+.staff-photo-wrap{display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-align-items:center;align-items:center;width:100%;margin-bottom:2px;}
+.staff-photo{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.25);margin-bottom:4px;}
+.staff-photo-pl{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-size:20px;margin-bottom:4px;}
+/* Profile & staff photo modals */
+#photoModal,#staffPhotoModal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:600;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;padding:20px;}
+#photoModal.gone,#staffPhotoModal.gone{display:none;}
+.photo-box{background:#1a2535;border:2px solid #3a5068;border-radius:18px;padding:24px 22px;width:92%;max-width:340px;text-align:center;}
+.photo-preview{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #2a4060;margin:0 auto 14px;display:block;background:#0f1a26;}
+.photo-preview-pl{width:100px;height:100px;border-radius:50%;background:#1e3040;border:3px solid #2a4060;margin:0 auto 14px;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;font-size:40px;color:#4a7090;}
+.photo-title{color:#c0d4e8;font-size:16px;font-weight:bold;margin-bottom:4px;}
+.photo-sub{color:#4a7090;font-size:12px;margin-bottom:18px;}
+.photo-btn{display:block;width:100%;border:none;border-radius:9px;padding:12px;font-size:14px;font-weight:bold;cursor:pointer;margin-bottom:8px;outline:none;}
+.photo-btn.blue{background:#1565a0;color:#fff;}
+.photo-btn.grey{background:#253344;color:#a0b8cc;}
+.photo-btn.red{background:#7a1a1a;color:#fca5a5;}
+#photoFileIn,#staffPhotoFileIn{display:none;}
 @media(max-width:600px){
   .notif{font-size:28px;padding:12px 46px 12px 10px;}
   .ndet{font-size:16px;}
@@ -192,6 +211,7 @@ body{background:#1a2535;font-family:-apple-system,Arial,sans-serif;min-height:10
 
 <div id="app">
 <div class="hdr">
+  <div id="avatarWrap" class="pavatar-wrap" onclick="openPhotoModal()" title="Change profile photo">&#128100;</div>
   <span class="htitle">&#x1F9B7; Dental Signal</span>
   <span class="hemail" id="emailLbl"></span>
   <span id="saveDot"></span>
@@ -319,6 +339,30 @@ body{background:#1a2535;font-family:-apple-system,Arial,sans-serif;min-height:10
     <button class="pwbtn grey" onclick="doSignOut()">Sign Out</button>
   </div>
 </div>
+<!-- PROFILE PHOTO MODAL -->
+<div id="photoModal" class="gone">
+  <div class="photo-box">
+    <div class="photo-title">Profile Photo</div>
+    <div class="photo-sub">Tap below to change your photo</div>
+    <div id="photoPreviewWrap" class="photo-preview-pl">&#128100;</div>
+    <button class="photo-btn blue" onclick="document.getElementById('photoFileIn').click()">&#128247; Choose Photo</button>
+    <button class="photo-btn red" id="photoRemoveBtn" style="display:none;" onclick="removeProfilePhoto()">Remove Photo</button>
+    <button class="photo-btn grey" onclick="closePhotoModal()">Cancel</button>
+    <input type="file" id="photoFileIn" accept="image/*" onchange="handleProfilePhotoFile(this)"/>
+  </div>
+</div>
+<!-- STAFF PHOTO MODAL -->
+<div id="staffPhotoModal" class="gone">
+  <div class="photo-box">
+    <div class="photo-title" id="staffPhotoTitle">Staff Photo</div>
+    <div class="photo-sub">Set a photo for this staff member</div>
+    <div id="staffPhotoPreviewWrap" class="photo-preview-pl">&#128100;</div>
+    <button class="photo-btn blue" onclick="document.getElementById('staffPhotoFileIn').click()">&#128247; Choose Photo</button>
+    <button class="photo-btn red" id="staffPhotoRemoveBtn" style="display:none;" onclick="removeStaffPhoto()">Remove Photo</button>
+    <button class="photo-btn grey" onclick="closeStaffPhotoModal()">Cancel</button>
+    <input type="file" id="staffPhotoFileIn" accept="image/*" onchange="handleStaffPhotoFile(this)"/>
+  </div>
+</div>
 <!-- PUSH NOTIFICATION PROMPT -->
 <div id="pushPrompt">
   <div class="pptext">&#128276; Enable notifications to receive signals even when the app is in the background.</div>
@@ -331,6 +375,7 @@ body{background:#1a2535;font-family:-apple-system,Arial,sans-serif;min-height:10
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 <script>
 firebase.initializeApp({
   apiKey:"AIzaSyBagSNoOdkl396yayvkUdYnRvGlWofADHw",
@@ -353,6 +398,8 @@ var allSignals=[], allHistory=[], saveTimer=null, initDone=false;
 var soundMap={}, SOUNDS=['chime','bells','alert','descend','soft','marimba','harp'];
 var timerSec=0, timerOn=false, timerInt=null, tabMode='in';
 var deviceId='', currentSubscription=null, deviceCount=0;
+var profilePhotoURL=null, staffPhotos={}, staffPhotoEditTarget=null;
+var storage=firebase.storage();
 
 // Capacitor plugin handles
 var Cap=window.Capacitor||null;
@@ -366,14 +413,15 @@ if(StatusBarPlugin){try{StatusBarPlugin.setStyle({style:'DARK'});}catch(e){}}
 function sigColl(){return db.collection('accounts').doc(uid).collection('signals');}
 function cfgDoc(){return db.collection('accounts').doc(uid);}
 function devColl(){return db.collection('accounts').doc(uid).collection('devices');}
+// The variety of callers to return different accounts with username & passwords
 
 // ── PUSH NOTIFICATIONS ──
-function initPushNotifications(){
+function initPushNotifications(){ //initiate push notifications
   if(!PushPlugin)return;
   try{if(localStorage.getItem('dsig_push_asked'))return;}catch(e){}
   setTimeout(function(){document.getElementById('pushPrompt').className='show';},2500);
 }
-function enablePush(){
+function enablePush(){ //ensure that the functioanlity is pushed into the website
   dismissPushPrompt();
   if(!PushPlugin)return;
   PushPlugin.requestPermissions().then(function(result){
@@ -393,6 +441,7 @@ function enablePush(){
 }
 function dismissPushPrompt(){document.getElementById('pushPrompt').className='';try{localStorage.setItem('dsig_push_asked','1');}catch(e){}}
 function openWebsite(){if(BrowserPlugin){try{BrowserPlugin.open({url:WEBSITE_URL});}catch(e){window.open(WEBSITE_URL,'_blank');}}else{window.open(WEBSITE_URL,'_blank');}}
+// website opening in order to check compatibiltiy of the ewbsite in order ot secrue browser that would faciliate internet
 
 // ── LOGIN ──
 function switchTab(m){tabMode=m;document.getElementById('t1').className='ltab'+(m==='in'?' on':'');document.getElementById('t2').className='ltab'+(m==='up'?' on':'');document.getElementById('authBtn').textContent=m==='in'?'Sign In':'Create Account';document.getElementById('fPass2').style.display=m==='up'?'block':'none';document.getElementById('forgotBtn').style.display=m==='in'?'block':'none';document.getElementById('authErr').textContent='';}
@@ -406,26 +455,33 @@ document.getElementById('fPass').addEventListener('keydown',function(e){if(e.key
 document.getElementById('fPass2').addEventListener('keydown',function(e){if(e.keyCode===13)doAuth();});
 document.getElementById('customIn').addEventListener('keydown',function(e){if(e.keyCode===13)sendCustom();});
 
+
 // ── AUTH STATE ──
 auth.onAuthStateChanged(function(user){
   if(user){uid=user.uid;document.getElementById('emailLbl').textContent=user.email;document.getElementById('loginScreen').className='gone';document.getElementById('app').className='on';startListeners();}
   else{uid=null;stopListeners();staffList=[];msgList=[];roomList=[];allSignals=[];currentSubscription=null;deviceCount=0;document.getElementById('paywall').style.display='none';document.getElementById('loginScreen').className='';document.getElementById('app').className='';document.getElementById('fPass').value='';document.getElementById('fPass2').value='';document.getElementById('authErr').textContent='';document.getElementById('planBtn').style.display='none';document.getElementById('planBadge').style.display='none';renderAllBtns();renderQueue();}
-});
+}); // Check if authentication status has been altered.
 
 // ── LISTENERS ──
 function startListeners(){
   initDone=false;allSignals=[];
   unsubCfg=cfgDoc().onSnapshot(function(doc){
     var data=doc.exists?doc.data():{};
-    var ns=data.staff||[],nm=data.messages||[],nr=data.rooms||[];
+    var ns=data.staff||[],nm=data.messages||[],nr=data.rooms||[]; //collecting data based on user decisions
     var changed=(JSON.stringify(ns)!==JSON.stringify(staffList))||(JSON.stringify(nm)!==JSON.stringify(msgList))||(JSON.stringify(nr)!==JSON.stringify(roomList));
     if(changed){staffList=ns;msgList=nm;roomList=nr;renderAllBtns();}
+    // Load profile photo
+    var pp=data.profilePhoto||null;
+    if(pp!==profilePhotoURL){profilePhotoURL=pp;updateAvatarUI();}
+    // Load staff photos
+    var sp=data.staffPhotos||{};
+    if(JSON.stringify(sp)!==JSON.stringify(staffPhotos)){staffPhotos=sp;renderStaff();}
     for(var i=0;i<msgList.length;i++){if(!soundMap[msgList[i]])soundMap[msgList[i]]='chime';}
     var sub=data.subscription||null;
     if(JSON.stringify(sub)!==JSON.stringify(currentSubscription)){currentSubscription=sub;updatePlanUI();if(sub&&sub.plan==='paid')document.getElementById('paywall').style.display='none';}
   },function(){setConn(false,'Config error');});
 
-  unsubSig=sigColl().orderBy('sentAt','asc').limitToLast(50).onSnapshot(function(snap){
+  unsubSig=sigColl().orderBy('sentAt','asc').limitToLast(50).onSnapshot(function(snap){ //relays from limiting signals
     setConn(true,'Live - all devices synced');
     allSignals=[];
     snap.forEach(function(d){allSignals.push({id:d.id,staff:d.data().staff,message:d.data().message,room:d.data().room,urgency:d.data().urgency,pingAll:d.data().pingAll,sentAt:d.data().sentAt});});
@@ -446,14 +502,14 @@ function startListeners(){
   },function(){setConn(false,'Cannot reach database');});
 }
 function stopListeners(){if(unsubCfg){unsubCfg();unsubCfg=null;}if(unsubSig){unsubSig();unsubSig=null;}}
-
+//ensure that the listener is working and so needs to be stopped by turning off with unsubSig()
 // ── CONFIG SAVE ──
 function schedSave(){document.getElementById('saveDot').className='on';if(saveTimer!==null){clearTimeout(saveTimer);saveTimer=null;}saveTimer=setTimeout(function(){if(!uid){document.getElementById('saveDot').className='';return;}cfgDoc().set({staff:staffList,messages:msgList,rooms:roomList},{merge:true}).then(function(){document.getElementById('saveDot').className='';}).catch(function(){document.getElementById('saveDot').className='';});saveTimer=null;},1500);}
-
+// using cache to store & use results
 // ── DEVICE TRACKING ──
 function getDeviceId(){var stored='';try{stored=localStorage.getItem('dsig_dev')||'';}catch(e){}if(stored)return stored;var fp=[navigator.userAgent||'',(screen.width||0)+'x'+(screen.height||0),screen.colorDepth||'',navigator.language||'',new Date().getTimezoneOffset(),navigator.platform||''].join('|');var hash=0;for(var i=0;i<fp.length;i++){hash=((hash<<5)-hash)+fp.charCodeAt(i);hash=hash&hash;}var rid='dev_'+Math.abs(hash).toString(16)+'_'+Math.random().toString(36).substring(2,8);try{localStorage.setItem('dsig_dev',rid);}catch(e){}return rid;}
 function getDeviceLimit(sub){return(!sub||sub.plan!=='paid')?FREE_DEVICE_LIMIT:(sub.deviceLimit||PRO_BASE_LIMIT);}
-function checkAndRegisterDevice(){
+function checkAndRegisterDevice(){ // important for paid  subscription plan
   if(!uid)return;
   deviceId=getDeviceId();
   var devRef=devColl().doc(deviceId);
@@ -464,18 +520,19 @@ function checkAndRegisterDevice(){
     devRef.set(devData,{merge:true});
     devColl().get().then(function(snap){deviceCount=snap.size;updatePlanUI();if(isNew&&deviceCount>getDeviceLimit(currentSubscription)){showPaywall();}}).catch(function(){});
   }).catch(function(){});
-}
+} // check & register device in order to grab deviceid and record the amount of devices for each account
 function updatePlanUI(){
   var sub=currentSubscription,limit=getDeviceLimit(sub),isPaid=sub&&sub.plan==='paid';
   var badge=document.getElementById('planBadge'),btn=document.getElementById('planBtn');
   badge.style.display='inline-block';btn.style.display='inline-block';
   if(isPaid){badge.className='on paid';badge.textContent='Pro — '+deviceCount+'/'+limit;btn.textContent='Pro';}
   else{badge.className=deviceCount>FREE_DEVICE_LIMIT?'on warn':'on';badge.textContent='Free — '+deviceCount+'/'+FREE_DEVICE_LIMIT;btn.textContent='Free';}
-}
+} 
 function showPaywall(){document.getElementById('pwDevId').textContent='Device ID: '+deviceId;document.getElementById('paywall').style.display='-webkit-flex';document.getElementById('paywall').style.display='flex';}
 
 // ── DEVICES MODAL ──
 function openDevices(){document.getElementById('devModal').classList.add('show');loadDevices();}
+// ensure that the website is put up for each dvice that is represented in reagrds to device registration
 function closeDevices(){document.getElementById('devModal').classList.remove('show');}
 function loadDevices(){
   var sub=currentSubscription,isPaid=sub&&sub.plan==='paid',limit=getDeviceLimit(sub);
@@ -508,7 +565,32 @@ function renderAllBtns(){renderStaff();renderMsg();renderRoom();}
 function renderStaff(){var c=document.getElementById('staffBtns');c.innerHTML='';for(var i=0;i<staffList.length;i++)c.appendChild(makeBtn('staff',staffList[i]));}
 function renderMsg(){var c=document.getElementById('msgBtns');c.innerHTML='';for(var i=0;i<msgList.length;i++)c.appendChild(makeBtn('msg',msgList[i]));}
 function renderRoom(){var c=document.getElementById('roomBtns');c.innerHTML='';for(var i=0;i<roomList.length;i++)c.appendChild(makeBtn('room',roomList[i]));}
-function makeBtn(type,name){var btn=document.createElement('button');var cls=type==='staff'?'staff-btn':type==='msg'?'msg-btn':'room-btn';var isSel=(type==='staff'&&selStaff===name)||(type==='msg'&&selMsg===name)||(type==='room'&&selRoom===name);btn.className=cls+(isSel?' on':'');btn.innerHTML=esc(name)+'<span class="dbadge">−</span>';var n=name,t=type;btn.onclick=(function(nm,tp,b){return function(){btnTap(b,tp,nm);};})(n,t,btn);btn.querySelector('.dbadge').onclick=(function(nm,tp){return function(e){e.stopPropagation();delItem(tp,nm);};})(n,t);return btn;}
+function makeBtn(type,name){
+  var btn=document.createElement('button');
+  var cls=type==='staff'?'staff-btn':type==='msg'?'msg-btn':'room-btn';
+  var isSel=(type==='staff'&&selStaff===name)||(type==='msg'&&selMsg===name)||(type==='room'&&selRoom===name);
+  btn.className=cls+(isSel?' on':'');
+  if(type==='staff'){
+    var photoURL=staffPhotos[name]||null;
+    var photoHtml=photoURL
+      ?'<div class="staff-photo-wrap"><img class="staff-photo" src="'+esc(photoURL)+'" alt=""/></div>'
+      :'<div class="staff-photo-wrap"><div class="staff-photo-pl">&#128100;</div></div>';
+    btn.innerHTML=photoHtml+esc(name)+'<span class="dbadge">−</span>';
+    // Long-press or double-tap to set photo
+    var pressTimer=null;
+    btn.addEventListener('touchstart',function(e){pressTimer=setTimeout(function(){openStaffPhotoModal(name);},600);},{passive:true});
+    btn.addEventListener('touchend',function(){clearTimeout(pressTimer);},{passive:true});
+    btn.addEventListener('touchmove',function(){clearTimeout(pressTimer);},{passive:true});
+    btn.addEventListener('dblclick',function(e){e.stopPropagation();openStaffPhotoModal(name);});
+  } else {
+    btn.innerHTML=esc(name)+'<span class="dbadge">−</span>';
+  }
+  var n=name,t=type;
+  btn.onclick=(function(nm,tp,b){return function(){btnTap(b,tp,nm);};})(n,t,btn);
+  btn.querySelector('.dbadge').onclick=(function(nm,tp){return function(e){e.stopPropagation();delItem(tp,nm);};})(n,t);
+  return btn;
+}
+
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ── INTERACTIONS ──
@@ -521,7 +603,8 @@ function arrRep(arr,old,nw){var o=[];for(var i=0;i<arr.length;i++){o.push(arr[i]
 function toggleEdit(){editMode=!editMode;var g=document.getElementById('mainGrid'),btn=document.getElementById('editBtn');if(editMode){g.classList.add('edit-on');btn.classList.add('on');btn.textContent='Done';}else{g.classList.remove('edit-on');btn.classList.remove('on');btn.textContent='Edit';}}
 function setUrg(u,btn){urgency=u;var btns=document.querySelectorAll('.ubtn');for(var i=0;i<btns.length;i++)btns[i].classList.remove('on');btn.classList.add('on');if(u==='urgent')document.getElementById('sendAll').checked=true;}
 function clearSels(){var all=document.querySelectorAll('.staff-btn,.msg-btn,.room-btn');for(var i=0;i<all.length;i++)all[i].classList.remove('on');selStaff='';selMsg='';selRoom='';var ub=document.querySelectorAll('.ubtn');for(var j=0;j<ub.length;j++)ub[j].classList.remove('on');var def=document.querySelector('.ubtn[data-u="normal"]');if(def)def.classList.add('on');urgency='normal';document.getElementById('sendAll').checked=false;}
-function clearAll(){clearSels();dismissBanner();}
+function clearAll(){clearSels();dismissBanner();} 
+// clear all notifications - ensure that all checks are cleared in order to ensure that all pre-defined values are clicked.
 function clearQueue(){allSignals=[];renderQueue();}
 
 // ── SEND ──
@@ -559,6 +642,101 @@ function openTimer(){document.getElementById('timerModal').classList.add('show')
 function closeTimer(){document.getElementById('timerModal').classList.remove('show');}
 function toggleTimer(){var btn=document.querySelector('.tstart');if(timerOn){clearInterval(timerInt);timerOn=false;btn.textContent='Start';btn.style.background='#5fa010';}else{timerInt=setInterval(function(){timerSec++;var m=String(Math.floor(timerSec/60));if(m.length<2)m='0'+m;var s=String(timerSec%60);if(s.length<2)s='0'+s;document.getElementById('tdisp').textContent=m+':'+s;},1000);timerOn=true;btn.textContent='Pause';btn.style.background='#b07800';}}
 function resetTimer(){clearInterval(timerInt);timerOn=false;timerSec=0;document.getElementById('tdisp').textContent='00:00';document.querySelector('.tstart').textContent='Start';document.querySelector('.tstart').style.background='#5fa010';}
+
+// ── PROFILE PHOTOS ──
+function updateAvatarUI(){
+  var wrap=document.getElementById('avatarWrap');
+  if(!wrap)return;
+  if(profilePhotoURL){
+    wrap.innerHTML='<img class="pavatar" src="'+esc(profilePhotoURL)+'" alt="Profile" onclick="openPhotoModal()"/>';
+    wrap.onclick=null;
+  } else {
+    wrap.innerHTML='&#128100;';
+    wrap.onclick=openPhotoModal;
+  }
+}
+// Photo Modal investigation
+function openPhotoModal(){
+  var modal=document.getElementById('photoModal');
+  var pw=document.getElementById('photoPreviewWrap');
+  var rb=document.getElementById('photoRemoveBtn');
+  if(profilePhotoURL){
+    pw.innerHTML='<img class="photo-preview" src="'+esc(profilePhotoURL)+'" alt=""/>';
+    rb.style.display='block';
+    // profilePhotoURL check if value is available
+  } else {
+    pw.className='photo-preview-pl';
+    pw.innerHTML='&#128100;';
+    rb.style.display='none';
+  } // if value is not available 
+  modal.className='';
+}
+// Photo Modal file input
+function closePhotoModal(){document.getElementById('photoModal').className='gone';}
+function handleProfilePhotoFile(input){
+  var file=input.files&&input.files[0];
+  if(!file||!uid)return;
+  closePhotoModal(); //  hide photomodal
+  var ref=storage.ref('profiles/'+uid+'/avatar_'+Date.now());
+  ref.put(file).then(function(snap){return snap.ref.getDownloadURL();}).then(function(url){
+    profilePhotoURL=url;
+    cfgDoc().set({profilePhoto:url},{merge:true});
+    updateAvatarUI();
+  }).catch(function(e){alert('Upload failed: '+e.message);});
+  input.value='';
+}
+// ensure flexibility of profile photo
+function removeProfilePhoto(){ // Remove and replace the profile photo
+  profilePhotoURL=null;
+  cfgDoc().set({profilePhoto:null},{merge:true});
+  updateAvatarUI();
+  closePhotoModal();
+}
+
+// Staff photo modal
+function openStaffPhotoModal(name){
+  staffPhotoEditTarget=name;
+  document.getElementById('staffPhotoTitle').textContent='Photo for '+name;
+  var pw=document.getElementById('staffPhotoPreviewWrap');
+  var rb=document.getElementById('staffPhotoRemoveBtn');
+  var url=staffPhotos[name]||null;
+  if(url){
+    pw.innerHTML='<img class="photo-preview" src="'+esc(url)+'" alt=""/>';
+    rb.style.display='block';
+  } else {
+    pw.className='photo-preview-pl';
+    pw.innerHTML='&#128100;';
+    rb.style.display='none';
+  }
+  document.getElementById('staffPhotoModal').className='';
+}
+function closeStaffPhotoModal(){document.getElementById('staffPhotoModal').className='gone';staffPhotoEditTarget=null;}
+function handleStaffPhotoFile(input){
+  var file=input.files&&input.files[0];
+  var name=staffPhotoEditTarget;
+  if(!file||!uid||!name)return;
+  closeStaffPhotoModal(); // document.getElementById('xyz');
+  var safeKey=name.replace(/[^a-zA-Z0-9_\-]/g,'_');
+  var ref=storage.ref('profiles/'+uid+'/staff/'+safeKey+'_'+Date.now());
+  ref.put(file).then(function(snap){return snap.ref.getDownloadURL();}).then(function(url){
+    staffPhotos[name]=url;
+    var upd={};upd['staffPhotos.'+name]=url;
+    cfgDoc().update(upd);
+    renderStaff();
+  }).catch(function(e){alert('Upload failed: '+e.message);});
+  input.value='';
+}
+// capture staff information in order to get photo modal in orde rto capture user input
+function removeStaffPhoto(){
+  var name=staffPhotoEditTarget;
+  if(!name)return;
+  delete staffPhotos[name];
+  var upd={};upd['staffPhotos.'+name]=firebase.firestore.FieldValue.delete();
+  cfgDoc().update(upd);
+  renderStaff();
+  closeStaffPhotoModal();
+}
+// remove profile phoot in regards to the staff for further explroiation of user exploration
 </script>
 </body>
 </html>
