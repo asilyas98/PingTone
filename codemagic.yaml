@@ -31,6 +31,11 @@ workflows:
       - name: Install CocoaPods
         script: cd ios/App && pod install
 
+      - name: Set export compliance
+        script: |
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" ios/App/App/Info.plist || \
+          /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" ios/App/App/Info.plist
+
       - name: Set up code signing profiles
         script: xcode-project use-profiles
 
