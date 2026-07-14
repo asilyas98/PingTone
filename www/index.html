@@ -467,7 +467,7 @@ function startListeners(){
   initDone=false;allSignals=[];
   unsubCfg=cfgDoc().onSnapshot(function(doc){
     var data=doc.exists?doc.data():{};
-    var ns=data.staff||[],nm=data.messages||[],nr=data.rooms||[]; //collecting data based on user decisions
+    var ns=data.staff||[],nm=data.messages||[],nr=data.rooms||[]; //collecting data based on user decisions 
     var changed=(JSON.stringify(ns)!==JSON.stringify(staffList))||(JSON.stringify(nm)!==JSON.stringify(msgList))||(JSON.stringify(nr)!==JSON.stringify(roomList));
     if(changed){staffList=ns;msgList=nm;roomList=nr;renderAllBtns();}
     // Load profile photo
