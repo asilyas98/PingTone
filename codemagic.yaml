@@ -31,6 +31,46 @@ workflows:
       - name: Install CocoaPods
         script: cd ios/App && pod install
 
+      - name: Add Privacy Manifest
+        script: |
+          cat > ios/App/App/PrivacyInfo.xcprivacy << 'PRIVACY_EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>NSPrivacyAccessedAPITypes</key>
+              <array>
+                  <dict>
+                      <key>NSPrivacyAccessedAPIType</key>
+                      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+                      <key>NSPrivacyAccessedAPITypeReasons</key>
+                      <array>
+                          <string>CA92.1</string>
+                      </array>
+                  </dict>
+              </array>
+              <key>NSPrivacyCollectedDataTypes</key>
+              <array/>
+              <key>NSPrivacyTracking</key>
+              <false/>
+              <key>NSPrivacyTrackingDomains</key>
+              <array/>
+          </dict>
+          </plist>
+          PRIVACY_EOF
+          ruby << 'RUBY_EOF'
+          require 'xcodeproj'
+          project = Xcodeproj::Project.open('ios/App/App.xcodeproj')
+          target = project.targets.first
+          group = project.main_group['App']
+          unless group.files.any? { |f| f.path == 'PrivacyInfo.xcprivacy' }
+            file_ref = group.new_file('PrivacyInfo.xcprivacy')
+            target.resources_build_phase.add_file_reference(file_ref)
+          end
+          project.save
+          puts 'PrivacyInfo.xcprivacy added to Xcode project'
+          RUBY_EOF
+
       - name: Set build number, privacy strings and export compliance
         script: |
           PLIST="ios/App/App/Info.plist"
