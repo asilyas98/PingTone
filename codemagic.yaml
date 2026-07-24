@@ -33,37 +33,38 @@ workflows:
 
       - name: Add Privacy Manifest
         script: |
-          # Write PrivacyInfo.xcprivacy using Python to avoid heredoc indentation issues
+          # Write PrivacyInfo.xcprivacy as list of lines (avoids YAML indent issues)
           python3 << 'PYEOF'
-          content = """<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>NSPrivacyAccessedAPITypes</key>
-    <array>
-        <dict>
-            <key>NSPrivacyAccessedAPIType</key>
-            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
-            <key>NSPrivacyAccessedAPITypeReasons</key>
-            <array>
-                <string>CA92.1</string>
-            </array>
-        </dict>
-    </array>
-    <key>NSPrivacyCollectedDataTypes</key>
-    <array/>
-    <key>NSPrivacyTracking</key>
-    <false/>
-    <key>NSPrivacyTrackingDomains</key>
-    <array/>
-</dict>
-</plist>
-"""
+          lines = [
+              '<?xml version="1.0" encoding="UTF-8"?>',
+              '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
+              '<plist version="1.0">',
+              '<dict>',
+              '    <key>NSPrivacyAccessedAPITypes</key>',
+              '    <array>',
+              '        <dict>',
+              '            <key>NSPrivacyAccessedAPIType</key>',
+              '            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>',
+              '            <key>NSPrivacyAccessedAPITypeReasons</key>',
+              '            <array>',
+              '                <string>CA92.1</string>',
+              '            </array>',
+              '        </dict>',
+              '    </array>',
+              '    <key>NSPrivacyCollectedDataTypes</key>',
+              '    <array/>',
+              '    <key>NSPrivacyTracking</key>',
+              '    <false/>',
+              '    <key>NSPrivacyTrackingDomains</key>',
+              '    <array/>',
+              '</dict>',
+              '</plist>',
+          ]
           with open('ios/App/App/PrivacyInfo.xcprivacy', 'w') as f:
-              f.write(content)
+              f.write('\n'.join(lines) + '\n')
           print('PrivacyInfo.xcprivacy written successfully')
           PYEOF
-          # Verify the file starts correctly (no leading whitespace)
+          # Verify no leading whitespace on first line
           head -1 ios/App/App/PrivacyInfo.xcprivacy
           # Add it to the Xcode project via xcodeproj gem
           ruby << 'RUBY_EOF'
