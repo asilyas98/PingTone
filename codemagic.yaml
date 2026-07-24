@@ -33,31 +33,39 @@ workflows:
 
       - name: Add Privacy Manifest
         script: |
-          cat > ios/App/App/PrivacyInfo.xcprivacy << 'PRIVACY_EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>NSPrivacyAccessedAPITypes</key>
-              <array>
-                  <dict>
-                      <key>NSPrivacyAccessedAPIType</key>
-                      <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
-                      <key>NSPrivacyAccessedAPITypeReasons</key>
-                      <array>
-                          <string>CA92.1</string>
-                      </array>
-                  </dict>
-              </array>
-              <key>NSPrivacyCollectedDataTypes</key>
-              <array/>
-              <key>NSPrivacyTracking</key>
-              <false/>
-              <key>NSPrivacyTrackingDomains</key>
-              <array/>
-          </dict>
-          </plist>
-          PRIVACY_EOF
+          # Write PrivacyInfo.xcprivacy using Python to avoid heredoc indentation issues
+          python3 << 'PYEOF'
+          content = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>CA92.1</string>
+            </array>
+        </dict>
+    </array>
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+    <key>NSPrivacyTracking</key>
+    <false/>
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+</dict>
+</plist>
+"""
+          with open('ios/App/App/PrivacyInfo.xcprivacy', 'w') as f:
+              f.write(content)
+          print('PrivacyInfo.xcprivacy written successfully')
+          PYEOF
+          # Verify the file starts correctly (no leading whitespace)
+          head -1 ios/App/App/PrivacyInfo.xcprivacy
+          # Add it to the Xcode project via xcodeproj gem
           ruby << 'RUBY_EOF'
           require 'xcodeproj'
           project = Xcodeproj::Project.open('ios/App/App.xcodeproj')
@@ -66,9 +74,11 @@ workflows:
           unless group.files.any? { |f| f.path == 'PrivacyInfo.xcprivacy' }
             file_ref = group.new_file('PrivacyInfo.xcprivacy')
             target.resources_build_phase.add_file_reference(file_ref)
+            puts 'PrivacyInfo.xcprivacy added to Xcode project'
+          else
+            puts 'PrivacyInfo.xcprivacy already in Xcode project'
           end
           project.save
-          puts 'PrivacyInfo.xcprivacy added to Xcode project'
           RUBY_EOF
 
       - name: Set build number, privacy strings and export compliance
