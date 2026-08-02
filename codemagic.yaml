@@ -33,6 +33,7 @@ workflows:
 
       - name: Inject app icon
         script: |
+          pip3 install Pillow --break-system-packages --quiet
           python3 << 'PYEOF'
           from PIL import Image
           import json, os, shutil
