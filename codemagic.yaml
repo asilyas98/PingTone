@@ -31,6 +31,67 @@ workflows:
       - name: Sync Capacitor iOS
         script: npx cap sync ios
 
+      - name: Inject app icon
+        script: |
+          python3 << 'PYEOF'
+          from PIL import Image
+          import json, os, shutil
+
+          src = 'ios-icons/icon-1024.png'
+          icon_dir = 'ios/App/App/Assets.xcassets/AppIcon.appiconset'
+          os.makedirs(icon_dir, exist_ok=True)
+
+          base = Image.open(src)
+
+          specs = [
+              ('icon-20@2x.png',   40),
+              ('icon-20@3x.png',   60),
+              ('icon-29@1x.png',   29),
+              ('icon-29@2x.png',   58),
+              ('icon-29@3x.png',   87),
+              ('icon-40@2x.png',   80),
+              ('icon-40@3x.png',  120),
+              ('icon-60@2x.png',  120),
+              ('icon-60@3x.png',  180),
+              ('icon-76@1x.png',   76),
+              ('icon-76@2x.png',  152),
+              ('icon-83.5@2x.png',167),
+              ('icon-1024.png',  1024),
+          ]
+
+          for fname, size in specs:
+              base.resize((size, size), Image.LANCZOS).save(f'{icon_dir}/{fname}')
+
+          contents = {
+            "images": [
+              {"idiom":"iphone","scale":"2x","size":"20x20","filename":"icon-20@2x.png"},
+              {"idiom":"iphone","scale":"3x","size":"20x20","filename":"icon-20@3x.png"},
+              {"idiom":"iphone","scale":"1x","size":"29x29","filename":"icon-29@1x.png"},
+              {"idiom":"iphone","scale":"2x","size":"29x29","filename":"icon-29@2x.png"},
+              {"idiom":"iphone","scale":"3x","size":"29x29","filename":"icon-29@3x.png"},
+              {"idiom":"iphone","scale":"2x","size":"40x40","filename":"icon-40@2x.png"},
+              {"idiom":"iphone","scale":"3x","size":"40x40","filename":"icon-40@3x.png"},
+              {"idiom":"iphone","scale":"2x","size":"60x60","filename":"icon-60@2x.png"},
+              {"idiom":"iphone","scale":"3x","size":"60x60","filename":"icon-60@3x.png"},
+              {"idiom":"ipad","scale":"1x","size":"20x20","filename":"icon-20@2x.png"},
+              {"idiom":"ipad","scale":"2x","size":"20x20","filename":"icon-40@2x.png"},
+              {"idiom":"ipad","scale":"1x","size":"29x29","filename":"icon-29@1x.png"},
+              {"idiom":"ipad","scale":"2x","size":"29x29","filename":"icon-29@2x.png"},
+              {"idiom":"ipad","scale":"1x","size":"40x40","filename":"icon-40@2x.png"},
+              {"idiom":"ipad","scale":"2x","size":"40x40","filename":"icon-40@3x.png"},
+              {"idiom":"ipad","scale":"1x","size":"76x76","filename":"icon-76@1x.png"},
+              {"idiom":"ipad","scale":"2x","size":"76x76","filename":"icon-76@2x.png"},
+              {"idiom":"ipad","scale":"2x","size":"83.5x83.5","filename":"icon-83.5@2x.png"},
+              {"idiom":"ios-marketing","scale":"1x","size":"1024x1024","filename":"icon-1024.png"}
+            ],
+            "info": {"author":"xcode","version":1}
+          }
+          with open(f'{icon_dir}/Contents.json', 'w') as f:
+              json.dump(contents, f, indent=2)
+
+          print(f'Icons injected into {icon_dir}')
+          PYEOF
+
       - name: Patch Podfile with framework privacy manifest hook
         script: |
           # Capacitor's Podfile already has a post_install block.
