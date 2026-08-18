@@ -118,7 +118,7 @@ workflows:
               '  _priv_xml += "  <key>NSPrivacyTracking</key>\\n  <false/>\\n"',
               '  _priv_xml += "  <key>NSPrivacyTrackingDomains</key>\\n  <array/>\\n"',
               '  _priv_xml += "</dict>\\n</plist>\\n"',
-              '  ["Capacitor", "CordovaPlugins"].each do |_pod_name|',
+              '  ["Capacitor", "CordovaPlugins", "Cordova"].each do |_pod_name|',
               '    _target = installer.pods_project.targets.find { |t| t.name == _pod_name }',
               '    next unless _target',
               '    _pod_dir = installer.sandbox.pod_dir(_pod_name).to_s',
