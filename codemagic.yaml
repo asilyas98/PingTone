@@ -102,13 +102,6 @@ workflows:
               content = f.read()
 
           injection = '\n'.join([
-              '  # --- Injected: lower deployment target to iOS 12.0',
-              '  installer.pods_project.targets.each do |_t|',
-              '    _t.build_configurations.each do |_c|',
-              '      _c.build_settings["IPHONEOS_DEPLOYMENT_TARGET"] = "12.0"',
-              '    end',
-              '  end',
-              '  installer.pods_project.save',
               '  # --- Injected: write PrivacyInfo.xcprivacy into framework pods (fixes ITMS-91061)',
               '  require "fileutils"',
               '  _priv_xml  = "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"',
@@ -209,40 +202,10 @@ workflows:
           project.save
           RUBY_EOF
 
-      - name: Set deployment target to iOS 12
-        script: |
-          # Lower minimum iOS version to 12.0 so iPad mini 2 (iOS 12.5.8) can install the app
-          ruby << 'RUBY_EOF'
-          require 'xcodeproj'
-          # App project
-          project = Xcodeproj::Project.open('ios/App/App.xcodeproj')
-          project.targets.each do |target|
-            target.build_configurations.each do |config|
-              config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
-            end
-          end
-          project.save
-          puts 'App.xcodeproj deployment target set to 12.0'
-          # Pods project
-          pods_proj = 'ios/App/Pods/Pods.xcodeproj'
-          if File.exist?(pods_proj)
-            pods = Xcodeproj::Project.open(pods_proj)
-            pods.targets.each do |target|
-              target.build_configurations.each do |config|
-                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
-              end
-            end
-            pods.save
-            puts 'Pods.xcodeproj deployment target set to 12.0'
-          end
-          RUBY_EOF
-
       - name: Set build number, privacy strings and export compliance
         script: |
           PLIST="ios/App/App/Info.plist"
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 12.0" "$PLIST" || \
-          /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 12.0" "$PLIST"
           /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST" || \
           /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" "$PLIST"
           /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Used to take a profile photo for staff members'" "$PLIST" || \
